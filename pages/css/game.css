@@ -9,7 +9,7 @@
   margin: auto;
   display: block;
   width: 800px;
-  height: 600px;
+  height: 450px;
   position: absolute;
   top: 0;
   bottom: 0;
@@ -22,3 +22,61 @@
   height:450px;
   background:#222;
 }
+
+#popup-instruction {
+  width: 400px;
+  margin: auto;
+  left: 0;
+  right: 0;
+  font-size: 25px;
+}
+
+#popup-holder {
+  padding: 0;
+  margin: auto;
+  display: block;
+  width: 800px;
+  height: 450px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#definition-wrapper {
+  width: 400px;
+  margin: auto;
+  left: 0;
+  right: 0;
+  text-align: center;
+}
+#sound-wrapper {
+  width: 400px;
+  margin: auto;
+  left: 0;
+  right: 0;
+  text-align: center;
+}
+
+#popup-submit-button-wrapper {
+  text-align: center;
+  
+}
+#popup-template {
+  color: #fff;
+  text-align: center;
+  background-color: #333;
+  border-radius: 10px;
+  border: 1px solid black;
+  padding: 40px;
+}
+
+#popup-question-letter {
+  font-size: 50px;
+  text-align: center;
+}
+

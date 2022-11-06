@@ -2,6 +2,8 @@ import Ghost from './Ghost';
 import Co from './Constant';
 import Player from './Player';
 import Room from './Room';
+import Task from './Task';
+import { ChineseT, chineseWords } from './chineseData';
 
 document.addEventListener('DOMContentLoaded', () => {
   // console.log('?');
@@ -15,6 +17,7 @@ type PointT = {
 
 class Game {
   rooms: Room[] = [];
+  tasks: Task[] = [];
   player: Player;
   canvas: HTMLCanvasElement;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -38,6 +41,7 @@ class Game {
   ];
   ghostSpeeds: number[] = [1, 1, 1];
   ghostDamages: number[] = [50, 10, 20];
+  correctChineseLetters: ChineseT[] = [];
   constructor(canvasId: string) {
     this.rooms.push(new Room());
     this.player = new Player(
@@ -50,7 +54,7 @@ class Game {
     if (!this.canvas) {
       return;
     }
-    for (let i = 0; i < Co.TASKS_AND_GHOSTS_COUNT; ++i) {
+    for (let i = 0; i < Co.GHOSTS_COUNT; ++i) {
       this.ghosts.push(
         new Ghost(
           this.ghostKeyPoints[i],
@@ -67,7 +71,42 @@ class Game {
     if (!this.ctx) {
       return;
     }
+
+    //tasks
+    if (chineseWords.length < Co.TASK_COUNT) {
+      console.error('NO LETTERS AVAILABLE');
+      return;
+    }
+    let arrayNumbered: number[] = [];
+    for (let i = 0; i < chineseWords.length; ++i) {
+      arrayNumbered.push(i);
+    }
+    arrayNumbered = this.shuffle(arrayNumbered);
+    for (let i = 0; i < Co.TASK_COUNT; ++i) {
+      console.log(arrayNumbered[i]);
+      this.tasks.push(new Task(arrayNumbered[i], this.correctChineseLetters));
+    }
+    console.log(this.tasks);
     this.startCapture();
+  }
+
+  shuffle(array: number[]): number[] {
+    let currentIndex = array.length,
+      randomIndex;
+
+    // While there remain elements to shuffle.
+    while (currentIndex != 0) {
+      // Pick a remaining element.
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+
+      // And swap it with the current element.
+      [array[currentIndex], array[randomIndex]] = [
+        array[randomIndex],
+        array[currentIndex],
+      ];
+    }
+    return array;
   }
 
   startCapture() {
@@ -107,14 +146,21 @@ class Game {
         this.player.running = false;
       }
     });
+    this.tasks.forEach((task) => {
+      task.render(this.ctx);
+    });
     this.player.move();
     // console.error('RENDER', this.ctx);
     this.player.render(this.ctx);
     this.player.checkDamage(this.ghosts);
+    this.player.checkTask(this.tasks);
     this.ghosts.forEach((ghost) => {
       ghost.move();
       ghost.render(this.ctx);
     });
+    if (this.correctChineseLetters.length === Co.TASK_COUNT) {
+      console.log('GAME OVER');
+    }
     window.requestAnimationFrame(this.captureFrame);
   };
 }

@@ -1,4 +1,5 @@
 import Ghost from 'Ghost';
+import Task from 'Task';
 import Co from './Constant';
 
 class Player {
@@ -15,6 +16,7 @@ class Player {
     this.running = false;
   }
   move() {
+    console.log('hmm');
     if (this.curMoveKey.toUpperCase() === 'W') {
       if (this.y < this.speed * (this.running ? Co.RUNNER_CONSTANT : 1)) {
         return;
@@ -49,8 +51,8 @@ class Player {
   }
   render(ctx: CanvasRenderingContext2D) {
     ctx.beginPath();
-    ctx.fillStyle = '#fee';
-    ctx.strokeStyle = '#fee';
+    ctx.fillStyle = '#f00';
+    ctx.strokeStyle = '#f00';
     ctx.beginPath();
     ctx.arc(this.x, this.y, Co.TEST_GHOST_PLAYER_SIZE, 0, 2 * Math.PI);
     ctx.stroke();
@@ -67,6 +69,18 @@ class Player {
         this.x = Co.GAME_WIDTH / 2;
         this.y = Co.GAME_HEIGHT / 2;
         console.log('hp:', this.hp);
+      }
+    });
+  }
+  checkTask(tasks: Task[]) {
+    tasks.forEach((task) => {
+      if (
+        task.calculateDistance(task.x, task.y, this.x, this.y) <
+        Co.PLAYER_GHOST_INTERACT_PROXIMITY
+      ) {
+        task.displayPopup();
+        this.x = Co.GAME_WIDTH / 2;
+        this.y = Co.GAME_HEIGHT / 2;
       }
     });
   }

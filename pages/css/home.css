@@ -1,0 +1,45 @@
+html, body {
+  background: #000;
+}
+
+#main {
+  background:url(../img/start.png);
+  background-size: contain;
+  padding: 0;
+  margin: auto;
+  display: block;
+  width: 800px;
+  height: 450px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px;
+}
+
+
+#title {
+  color:red;
+	font-size:60px;
+	font-weight:bold;
+	margin:30px;
+	font-family:"arial";
+  margin-top: 70px;
+}
+
+#buttons-wrapper {
+  margin:30px;
+	position:absolute;
+	bottom:0;
+}
+
+#start,#difficulty,#how-to-play {
+	border:none;
+	color:red;
+	background:none;
+	font-size:30px;
+	font-family:"arial";
+	cursor:pointer;
+  text-decoration: none;
+}
