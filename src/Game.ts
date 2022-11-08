@@ -4,9 +4,19 @@ import Player from './Player';
 import Room from './Room';
 import Task from './Task';
 import { ChineseT, chineseWords } from './chineseData';
+type PopupT = {
+  isOpen: boolean;
+};
 
 document.addEventListener('DOMContentLoaded', () => {
-  // console.log('?');
+  const audio = document.getElementById('background-music') as HTMLAudioElement;
+  if (!audio) {
+    return;
+  }
+  audio.volume = 0.1;
+  audio.autoplay = true;
+  audio.loop = true;
+  audio.play();
   new Game('cv');
 });
 
@@ -26,11 +36,11 @@ class Game {
   ghostKeyPoints: PointT[][] = [
     [
       { x: 600, y: 0 },
-      { x: 600, y: 450 },
+      { x: 600, y: 563 },
     ],
     [
       { x: 0, y: 350 },
-      { x: 800, y: 340 },
+      { x: 1000, y: 340 },
     ],
     [
       { x: 0, y: 200 },
@@ -38,10 +48,20 @@ class Game {
       { x: 200, y: 400 },
       { x: 0, y: 400 },
     ],
+    [
+      { x: 700, y: 0 },
+      { x: 700, y: 200 },
+      { x: 999, y: 200 },
+    ],
+    [
+      { x: 200, y: 0 },
+      { x: 200, y: 563 },
+    ],
   ];
-  ghostSpeeds: number[] = [1, 1, 1];
-  ghostDamages: number[] = [50, 10, 20];
+  ghostSpeeds: number[] = [1, 0.5, 1, 1, 10];
+  ghostDamages: number[] = [50, 10, 20, 10, 0];
   correctChineseLetters: ChineseT[] = [];
+  popupState: PopupT = { isOpen: false };
   constructor(canvasId: string) {
     this.rooms.push(new Room());
     this.player = new Player(
@@ -83,8 +103,10 @@ class Game {
     }
     arrayNumbered = this.shuffle(arrayNumbered);
     for (let i = 0; i < Co.TASK_COUNT; ++i) {
-      console.log(arrayNumbered[i]);
-      this.tasks.push(new Task(arrayNumbered[i], this.correctChineseLetters));
+      // console.log(arrayNumbered[i]);
+      this.tasks.push(
+        new Task(arrayNumbered[i], this.correctChineseLetters, this.popupState),
+      );
     }
     console.log(this.tasks);
     this.startCapture();
@@ -114,6 +136,9 @@ class Game {
   }
   captureFrame = () => {
     this.ctx.clearRect(0, 0, Co.GAME_WIDTH, Co.GAME_HEIGHT);
+    const background = new Image();
+    background.src = require('../static/img/graveyard.png');
+    this.ctx.drawImage(background, 0, 0, background.width, background.height);
     document.body.addEventListener('keydown', (e) => {
       if (e.key === 'F12') {
         return;
@@ -146,21 +171,53 @@ class Game {
         this.player.running = false;
       }
     });
-    this.tasks.forEach((task) => {
-      task.render(this.ctx);
-    });
-    this.player.move();
-    // console.error('RENDER', this.ctx);
-    this.player.render(this.ctx);
-    this.player.checkDamage(this.ghosts);
-    this.player.checkTask(this.tasks);
-    this.ghosts.forEach((ghost) => {
-      ghost.move();
-      ghost.render(this.ctx);
-    });
-    if (this.correctChineseLetters.length === Co.TASK_COUNT) {
-      console.log('GAME OVER');
+    // console.log(this.popupState.isOpen);
+    if (!this.popupState.isOpen) {
+      this.player.move();
+      this.player.checkDamage(this.ghosts);
+      if (this.player.hp <= 0) {
+        const statusBar = document.getElementById('status-text-div');
+        if (!statusBar) {
+          return;
+        }
+        statusBar.innerHTML = '죽었습니다. 3초 뒤에 시작 화면으로 이동됩니다.';
+        setTimeout(() => {
+          window.location.href = 'home.html';
+          console.log(window.location.href);
+        }, 3000);
+      }
+      this.player.checkTask(this.tasks);
+      this.ghosts.forEach((ghost) => {
+        ghost.move();
+        ghost.render(this.ctx);
+      });
+      this.tasks.forEach((task) => {
+        task.render(this.ctx);
+      });
+      this.player.render(this.ctx);
     }
-    window.requestAnimationFrame(this.captureFrame);
+    // console.error('RENDER', this.ctx);
+    if (this.correctChineseLetters.length === Co.TASK_COUNT) {
+      const statusBar = document.getElementById('status-text-div');
+      if (!statusBar) {
+        return;
+      }
+      statusBar.innerHTML =
+        '축하합니다. 모든 한자를 맞추셨습니다. 3초 뒤에 시작 화면으로 이동됩니다.';
+      setTimeout(() => {
+        statusBar.innerHTML =
+          '축하합니다. 모든 한자를 맞추셨습니다. 2초 뒤에 시작 화면으로 이동됩니다.';
+        setTimeout(() => {
+          statusBar.innerHTML =
+            '축하합니다. 모든 한자를 맞추셨습니다. 1초 뒤에 시작 화면으로 이동됩니다.';
+          setTimeout(() => {
+            window.location.href = 'home.html';
+            console.log(window.location.href);
+          }, 1000);
+        }, 1000);
+      }, 1000);
+    } else {
+      window.requestAnimationFrame(this.captureFrame);
+    }
   };
 }

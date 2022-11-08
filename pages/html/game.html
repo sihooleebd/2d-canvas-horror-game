@@ -9,9 +9,20 @@
     <script type="module" src="/src/Game.ts"></script>
   </head>
   <body>
+    <div id="audios">
+      <audio
+        id="background-music"
+        src="/static/audio/main-page-audio.mp3"
+      ></audio>
+      <audio id="click-effect" src="/static/audio/click-effect.mp3"></audio>
+    </div>
+    <div id="correct-chinese-letters">맞힌 한자들 : [없음]</div>
     <div id="cv-wrapper">
+      <div id="status-text-div"></div>
       <canvas id="cv"></canvas>
     </div>
     <div id="popup-holder"></div>
+    <div id="hp">hp : 100</div>
+    <progress id="health" value="100" max="100"></progress>
   </body>
 </html>

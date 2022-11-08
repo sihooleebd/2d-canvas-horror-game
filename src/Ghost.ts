@@ -10,6 +10,7 @@ class Ghost {
   y = 0;
   keyPoints: PointT[] = [];
   prevKeyPointIdx = 0;
+  image: HTMLImageElement = new Image();
   ghostImgId = 0;
   xDiff = 0;
   yDiff = 0;
@@ -33,6 +34,27 @@ class Ghost {
     this.recalculateXYDiff();
     this.speed = speed;
     this.damage = damage;
+    if (this.ghostImgId == 1) {
+      this.image.src = require(`../static/img/ghosts/ghost1.png`);
+      this.image.width = 70;
+      this.image.height = (this.image.width * 99) / 33;
+    } else if (this.ghostImgId == 2) {
+      this.image.src = require(`../static/img/ghosts/ghost2.png`);
+      this.image.width = 60;
+      this.image.height = (this.image.width * 78) / 27;
+    } else if (this.ghostImgId == 3) {
+      this.image.src = require(`../static/img/ghosts/ghost3.png`);
+      this.image.width = 130;
+      this.image.height = (this.image.width * 46) / 75;
+    } else if (this.ghostImgId == 4) {
+      this.image.src = require(`../static/img/ghosts/ghost4.png`);
+      this.image.width = 70;
+      this.image.height = (this.image.width * 95) / 52;
+    } else {
+      this.image.src = require(`../static/img/ghosts/ghost5.png`);
+      this.image.width = 70;
+      this.image.height = (this.image.width * 98) / 53;
+    }
   }
 
   recalculateXYDiff() {
@@ -78,14 +100,26 @@ class Ghost {
     }
   }
   render(ctx: CanvasRenderingContext2D) {
-    ctx.beginPath();
-    ctx.fillStyle = '#0f0';
-    ctx.strokeStyle = '#0f0';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, Co.TEST_GHOST_PLAYER_SIZE, 0, 2 * Math.PI);
-    ctx.stroke();
-    ctx.fill();
-    ctx.closePath();
+    // console.log('image', this.image.src);
+    // ctx.beginPath();
+    // ctx.fillStyle = '#0f0';
+    // ctx.strokeStyle = '#0f0';
+    // ctx.beginPath();
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    // console.log(this.image.width, this.image.height);
+    ctx.drawImage(
+      this.image,
+      -this.image.width / 2,
+      -this.image.height / 2,
+      this.image.width,
+      this.image.height,
+    );
+    ctx.restore();
+    // ctx.arc(this.x, this.y, Co.TEST_GHOST_PLAYER_SIZE, 0, 2 * Math.PI);
+    // ctx.stroke();
+    // ctx.fill();
+    // ctx.closePath();
   }
 }
 

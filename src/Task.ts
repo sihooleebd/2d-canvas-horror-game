@@ -1,7 +1,9 @@
 import Co from './Constant';
 import { ChineseT, chineseWords } from './chineseData';
 import { popupTemplate } from './popup.tpl';
-import Go from './Global';
+type PopupT = {
+  isOpen: boolean;
+};
 
 class Task {
   x = 0;
@@ -10,26 +12,37 @@ class Task {
   trickQuestions: ChineseT[] = [];
   correctChineseLetters: ChineseT[] = [];
   answered: boolean;
+  popupState: PopupT;
+  clickSound = document.getElementById('click-effect') as HTMLAudioElement;
+  image = new Image();
   createTaskOnBorder() {
     const a = Math.floor(Math.random() * 4);
     if (a === 1) {
-      this.x = 0;
+      this.x = 35;
       this.y = Math.random() * Co.GAME_HEIGHT;
     } else if (a === 2) {
-      this.x = Co.GAME_WIDTH;
+      this.x = Co.GAME_WIDTH - 35;
       this.y = Math.random() * Co.GAME_HEIGHT;
     } else if (a === 3) {
       this.x = Math.random() * Co.GAME_WIDTH;
-      this.y = 0;
+      this.y = 27;
     } else {
       this.x = Math.random() * Co.GAME_WIDTH;
-      this.y = Co.GAME_HEIGHT;
+      this.y = Co.GAME_HEIGHT - 27;
     }
   }
 
-  constructor(answerIdx: number, correctChineseLetters: ChineseT[]) {
+  constructor(
+    answerIdx: number,
+    correctChineseLetters: ChineseT[],
+    popupState: PopupT,
+  ) {
+    this.image.src = require('../static/img/chest.png');
+    this.image.width = 70;
+    this.image.height = 54;
     this.createTaskOnBorder();
     this.answer = chineseWords[answerIdx];
+    this.popupState = popupState;
     let prevTrickQuestion = 0;
     for (let i = 0; i < 2; ++i) {
       const randomNum = Math.floor(Math.random() * chineseWords.length);
@@ -60,7 +73,7 @@ class Task {
         return chineseLetter.definition;
       }),
     );
-    console.log(definitions);
+    // console.log(definitions);
     const sounds = this.shuffle(
       fullArr.map((chineseLetter: ChineseT) => {
         return chineseLetter.sound;
@@ -79,15 +92,20 @@ class Task {
       return;
     }
     popupHolder.innerHTML = popupHtml;
+    this.popupState.isOpen = true;
+    console.log('yay');
     const form = document.getElementById('popup-form') as HTMLFormElement;
     if (!form) {
       return;
     }
+
     form.addEventListener('submit', (e) => {
-      console.log(e);
+      this.clickSound.volume = 1;
+      console.log(this.clickSound);
+      this.clickSound?.play();
+      // console.log(e);
       e.preventDefault();
       const data = new FormData(form);
-      const output = '';
       let definitionCorrect = false;
       let soundCorrect = false;
       for (const entry of data) {
@@ -98,17 +116,43 @@ class Task {
           soundCorrect = true;
         }
       }
+      const statusBar = document.getElementById('status-text-div');
+      if (!statusBar) {
+        return;
+      }
       if (definitionCorrect && soundCorrect) {
         console.log('CORRECT');
+        statusBar.innerHTML = '맞았습니다!!!';
         this.correctChineseLetters.push(this.answer);
         this.answered = true;
         console.log(this.correctChineseLetters);
+        const correctChineseLettersHtml = document.getElementById(
+          'correct-chinese-letters',
+        );
+        console.log(correctChineseLettersHtml);
+        if (!correctChineseLettersHtml) {
+          return;
+        }
+        let outputStr = '맞힌 한자들 : [';
+        this.correctChineseLetters.forEach((chineseLetter: ChineseT) => {
+          outputStr =
+            outputStr +
+            `${chineseLetter.letter}(${chineseLetter.definition} ${chineseLetter.sound}), `;
+        });
+        outputStr = outputStr.slice(0, -2);
+        outputStr = outputStr + ']';
+        correctChineseLettersHtml.innerHTML = outputStr;
       } else {
         console.log('INCORRECT');
+        statusBar.innerHTML = '오답입니다.';
       }
-      console.log(output);
-      console.log(data);
+      setTimeout(() => {
+        statusBar.innerHTML = '';
+      }, 1000);
+      // console.log(output);
+      // console.log(data);
       popupHolder.innerHTML = '';
+      this.popupState.isOpen = false;
     });
   }
 
@@ -135,14 +179,25 @@ class Task {
     if (this.answered) {
       return;
     }
-    ctx.beginPath();
-    ctx.fillStyle = '#00f';
-    ctx.strokeStyle = '#00f';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, Co.TEST_GHOST_PLAYER_SIZE, 0, 2 * Math.PI);
-    ctx.stroke();
-    ctx.fill();
-    ctx.closePath();
+    // ctx.beginPath();
+    // ctx.fillStyle = '#00f';
+    // ctx.strokeStyle = '#00f';
+    // ctx.beginPath();
+    // ctx.arc(this.x, this.y, Co.TEST_GHOST_PLAYER_SIZE, 0, 2 * Math.PI);
+    // ctx.stroke();
+    // ctx.fill();
+    // ctx.closePath();
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    // console.log(this.image.width, this.image.height);
+    ctx.drawImage(
+      this.image,
+      -this.image.width / 2,
+      -this.image.height / 2,
+      this.image.width,
+      this.image.height,
+    );
+    ctx.restore();
   }
   calculateDistance(x1: number, y1: number, x2: number, y2: number) {
     return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));

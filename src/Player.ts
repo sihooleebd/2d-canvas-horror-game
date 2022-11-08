@@ -9,14 +9,24 @@ class Player {
   curMoveKey = '';
   running: boolean;
   hp: number = Co.PLAYER_HP;
+  image = new Image();
+  healthBar = document.getElementById('health');
   constructor(x: number, y: number, speed: number) {
     this.x = x;
     this.y = y;
     this.speed = speed;
     this.running = false;
+    this.image.src = require('../static/img/main-character.png');
+    // console.log(this.image);
+    const oldWidth = this.image.width;
+    const oldHeight = this.image.height;
+    // console.log('old', oldWidth, oldHeight);
+    this.image.width = 70;
+    this.image.height = (this.image.width * 52) / 30;
+    // console.log('player', this.image.width, this.image.height);
   }
   move() {
-    console.log('hmm');
+    // console.log('hmm');
     if (this.curMoveKey.toUpperCase() === 'W') {
       if (this.y < this.speed * (this.running ? Co.RUNNER_CONSTANT : 1)) {
         return;
@@ -50,14 +60,17 @@ class Player {
     // console.log('x:', this.x, 'y:', this.y);
   }
   render(ctx: CanvasRenderingContext2D) {
-    ctx.beginPath();
-    ctx.fillStyle = '#f00';
-    ctx.strokeStyle = '#f00';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, Co.TEST_GHOST_PLAYER_SIZE, 0, 2 * Math.PI);
-    ctx.stroke();
-    ctx.fill();
-    ctx.closePath();
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    // console.log(this.image.width, this.image.height);
+    ctx.drawImage(
+      this.image,
+      -this.image.width / 2,
+      -this.image.height / 2,
+      this.image.width,
+      this.image.height,
+    );
+    ctx.restore();
   }
   checkDamage(ghosts: Ghost[]) {
     ghosts.forEach((ghost) => {
@@ -68,12 +81,20 @@ class Player {
         this.hp -= ghost.damage;
         this.x = Co.GAME_WIDTH / 2;
         this.y = Co.GAME_HEIGHT / 2;
-        console.log('hp:', this.hp);
+        const hpHtml = document.getElementById('hp');
+        if (!hpHtml) {
+          return;
+        }
+        hpHtml.innerHTML = `hp : ${this.hp}`;
+        this.healthBar.value = this.hp;
       }
     });
   }
   checkTask(tasks: Task[]) {
     tasks.forEach((task) => {
+      if (task.answered) {
+        return;
+      }
       if (
         task.calculateDistance(task.x, task.y, this.x, this.y) <
         Co.PLAYER_GHOST_INTERACT_PROXIMITY
