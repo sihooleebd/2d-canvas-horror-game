@@ -152,3 +152,70 @@ input[type="radio"]:checked+label {
   margin: 20px;
   accent-color: #B01E28;
 }
+
+#game-over-holder {
+  display: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  
+}
+
+#game-over {
+  padding: 0;
+  margin: auto;
+  display: flex;
+  width: 1000px;
+  height: 563px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 50px;
+  background: url(/static/img/eye-horror.gif) center center;
+  background-size: 100%;
+  color: #fff;
+  font-family: 'typewriter';
+}
+
+#game-success-holder {
+  display: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+#game-success {
+  padding: 0;
+  margin: auto;
+  display: flex;
+  width: 1000px;
+  height: 563px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 50px;
+  background: url(/static/img/tv-glitching.gif) center center;
+  background-size: 100%;
+  color: #fff;
+  font-family: 'typewriter';
+}
+
+@font-face {
+  font-family: 'typewriter';
+  src: url(/static/font/typewriter.ttf) format('truetype');
+  src: url(/static/font/typewriter.otf) format('opentype');
+}

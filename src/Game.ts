@@ -4,6 +4,7 @@ import Player from './Player';
 import Room from './Room';
 import Task from './Task';
 import { ChineseT, chineseWords } from './chineseData';
+import ghostDatas from './ghostData';
 type PopupT = {
   isOpen: boolean;
 };
@@ -13,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!audio) {
     return;
   }
-  audio.volume = 0.1;
+  audio.volume = 0.15;
   audio.autoplay = true;
   audio.loop = true;
   audio.play();
@@ -33,33 +34,8 @@ class Game {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ctx: any;
   ghosts: Ghost[] = [];
-  ghostKeyPoints: PointT[][] = [
-    [
-      { x: 600, y: 0 },
-      { x: 600, y: 563 },
-    ],
-    [
-      { x: 0, y: 350 },
-      { x: 1000, y: 340 },
-    ],
-    [
-      { x: 0, y: 200 },
-      { x: 200, y: 200 },
-      { x: 200, y: 400 },
-      { x: 0, y: 400 },
-    ],
-    [
-      { x: 700, y: 0 },
-      { x: 700, y: 200 },
-      { x: 999, y: 200 },
-    ],
-    [
-      { x: 200, y: 0 },
-      { x: 200, y: 563 },
-    ],
-  ];
-  ghostSpeeds: number[] = [1, 0.5, 1, 1, 10];
-  ghostDamages: number[] = [50, 10, 20, 10, 0];
+  tvStatic = document.getElementById('tv-static') as HTMLAudioElement;
+  tvStaticMono = document.getElementById('tv-static-mono') as HTMLAudioElement;
   correctChineseLetters: ChineseT[] = [];
   popupState: PopupT = { isOpen: false };
   constructor(canvasId: string) {
@@ -75,14 +51,7 @@ class Game {
       return;
     }
     for (let i = 0; i < Co.GHOSTS_COUNT; ++i) {
-      this.ghosts.push(
-        new Ghost(
-          this.ghostKeyPoints[i],
-          i + 1,
-          this.ghostSpeeds[i],
-          this.ghostDamages[i],
-        ),
-      );
+      this.ghosts.push(new Ghost(ghostDatas[i]));
     }
     // console.log(this.ghosts);
     this.canvas.width = Co.GAME_WIDTH;
@@ -93,23 +62,116 @@ class Game {
     }
 
     //tasks
+    this.createTasks();
+    console.log(this.tasks);
+    this.requestKeyboardEventHandlers();
+    this.startCapture();
+  }
+
+  getSpacedTaskArray() {
+    // const spacedTaskArray: number[] = [firstIdx];
+    // for (let i = 1; i < Co.TASK_COUNT; ++i) {
+    //   spacedTaskArray.push((firstIdx + Co.TASK_SPACE) % Co.TASK_ROUND);
+    // }
+    const initialPosition = Math.floor(Math.random() * Co.TASK_ROUND);
+    const spacedTaskArray: number[] = [initialPosition];
+    for (let i = 1; i < Co.TASK_COUNT; ++i) {
+      spacedTaskArray.push(
+        (initialPosition + Co.TASK_SPACE * i) % Co.TASK_ROUND,
+      );
+    }
+
+    console.log('SpacedTaskArray', spacedTaskArray);
+    const randomizedTaskArray = spacedTaskArray.map(
+      (spacedTask) =>
+        (spacedTask +
+          (Math.random() * 2 * Co.TASK_MOVE_WIDTH -
+            Co.TASK_MOVE_WIDTH +
+            Co.TASK_ROUND)) %
+        Co.TASK_ROUND,
+    );
+    console.log('RandomizedTaskArray', randomizedTaskArray);
+
+    //
+
+    return randomizedTaskArray.map((spaceTask) =>
+      this.convertSpacedTaskToPos(spaceTask),
+    );
+  }
+  convertSpacedTaskToPos(spacedTask: number): PointT {
+    if (spacedTask >= Co.TASK_ROUND - (Co.GAME_HEIGHT - 27 * 2)) {
+      //좌변
+      return {
+        x: 35,
+        y:
+          Co.GAME_HEIGHT -
+          27 -
+          (spacedTask - (Co.TASK_ROUND - (Co.GAME_HEIGHT - 27 * 2))),
+      };
+    } else if (
+      spacedTask >=
+      Co.TASK_ROUND - (Co.GAME_HEIGHT - 27 * 2) - (Co.GAME_WIDTH - 35 * 2)
+    ) {
+      //밑면
+      return {
+        x:
+          Co.GAME_WIDTH -
+          35 -
+          (spacedTask -
+            (Co.TASK_ROUND -
+              (Co.GAME_HEIGHT - 27 * 2) -
+              (Co.GAME_WIDTH - 35 * 2))),
+        y: Co.GAME_HEIGHT - 27,
+      };
+    } else if (
+      spacedTask >=
+      Co.TASK_ROUND - (Co.GAME_HEIGHT - 27 * 2) * 2 - (Co.GAME_WIDTH - 35 * 2)
+    ) {
+      //오른변
+      return {
+        x: Co.GAME_WIDTH - 35,
+        y: 27 + (spacedTask - (Co.GAME_WIDTH - 35 * 2)),
+      };
+    } else {
+      //윗변
+      return {
+        x:
+          35 +
+          (spacedTask -
+            (Co.TASK_ROUND -
+              (Co.GAME_HEIGHT - 27 * 2) * 2 -
+              (Co.GAME_WIDTH - 35 * 2) * 2)),
+        y: 27,
+      };
+    }
+  }
+
+  createTasks() {
+    for (let i = 0; i < Co.TASK_ROUND; ++i) {
+      console.log(i, this.convertSpacedTaskToPos(i));
+    }
+
     if (chineseWords.length < Co.TASK_COUNT) {
       console.error('NO LETTERS AVAILABLE');
       return;
     }
-    let arrayNumbered: number[] = [];
+    let letterIndices: number[] = [];
     for (let i = 0; i < chineseWords.length; ++i) {
-      arrayNumbered.push(i);
+      letterIndices.push(i);
     }
-    arrayNumbered = this.shuffle(arrayNumbered);
+    letterIndices = this.shuffle(letterIndices);
+    const spacedTaskArray = this.getSpacedTaskArray();
     for (let i = 0; i < Co.TASK_COUNT; ++i) {
       // console.log(arrayNumbered[i]);
       this.tasks.push(
-        new Task(arrayNumbered[i], this.correctChineseLetters, this.popupState),
+        new Task(
+          letterIndices[i],
+          this.correctChineseLetters,
+          this.popupState,
+          spacedTaskArray[i],
+        ),
       );
     }
-    console.log(this.tasks);
-    this.startCapture();
   }
 
   shuffle(array: number[]): number[] {
@@ -131,27 +193,25 @@ class Game {
     return array;
   }
 
-  startCapture() {
-    window.requestAnimationFrame(this.captureFrame);
-  }
-  captureFrame = () => {
-    this.ctx.clearRect(0, 0, Co.GAME_WIDTH, Co.GAME_HEIGHT);
-    const background = new Image();
-    background.src = require('../static/img/graveyard.png');
-    this.ctx.drawImage(background, 0, 0, background.width, background.height);
+  requestKeyboardEventHandlers() {
     document.body.addEventListener('keydown', (e) => {
+      console.log('KEYDOWN', e.key);
       if (e.key === 'F12') {
         return;
       }
       if (
-        e.key.toUpperCase() === 'W' ||
-        e.key.toUpperCase() === 'A' ||
-        e.key.toUpperCase() === 'S' ||
-        e.key.toUpperCase() === 'D'
+        this.convertToWASDFormat(e.key).toUpperCase() === 'W' ||
+        this.convertToWASDFormat(e.key).toUpperCase() === 'A' ||
+        this.convertToWASDFormat(e.key).toUpperCase() === 'S' ||
+        this.convertToWASDFormat(e.key).toUpperCase() === 'D' ||
+        this.convertToWASDFormat(e.key).toUpperCase() === 'ㅈ' ||
+        this.convertToWASDFormat(e.key).toUpperCase() === 'ㅁ' ||
+        this.convertToWASDFormat(e.key).toUpperCase() === 'ㄴ' ||
+        this.convertToWASDFormat(e.key).toUpperCase() === 'ㅇ'
       ) {
         e.preventDefault();
         // console.log(e);
-        this.player.curMoveKey = e.key;
+        this.player.curMoveKey = this.convertToWASDFormat(e.key);
         // console.log(this.player.curMoveKey);
       }
       if (e.key.toUpperCase() === 'SHIFT') {
@@ -162,7 +222,7 @@ class Game {
       if (e.key === 'F12') {
         return;
       }
-      if (e.key === this.player.curMoveKey) {
+      if (this.convertToWASDFormat(e.key) === this.player.curMoveKey) {
         e.preventDefault();
         this.player.curMoveKey = '';
         // console.log(this.player.curMoveKey);
@@ -171,21 +231,92 @@ class Game {
         this.player.running = false;
       }
     });
+  }
+
+  startCapture() {
+    window.requestAnimationFrame(this.captureFrame);
+  }
+
+  convertToWASDFormat(key: string) {
+    if (key === 'ArrowUp') {
+      return 'W';
+    }
+    if (key === 'ArrowLeft') {
+      return 'A';
+    }
+    if (key === 'ArrowDown') {
+      return 'S';
+    }
+    if (key === 'ArrowRight') {
+      return 'D';
+    }
+    if (key === 'ㅉ') {
+      return 'ㅈ';
+    }
+    return key;
+  }
+
+  doAfter = (fun: () => void, after: number): Promise<void> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        fun();
+        resolve();
+      }, after);
+    });
+  };
+
+  async checkHp() {
+    if (this.player.hp <= 0) {
+      const deadHolder = document.getElementById('game-over-holder');
+      const deadMessage = document.getElementById('game-over');
+      if (!deadHolder || !deadMessage) {
+        return;
+      }
+      deadHolder.style.display = 'block';
+      const audio = document.getElementById(
+        'background-music',
+      ) as HTMLAudioElement;
+      if (!audio) {
+        return;
+      }
+      audio.pause();
+
+      this.tvStaticMono.volume = 1;
+      this.tvStaticMono.loop = true;
+      console.log(this.tvStaticMono);
+      this.tvStaticMono?.play();
+      this.player.hp = 0;
+      // await this.doAfter(() => {
+      //   deadMessage.style.color = 'red';
+      //   deadMessage.style.fontSize = '70px';
+      //   console.log('hahahahaha');
+      // }, 2500);
+      await this.doAfter(() => {
+        deadMessage.style.background = '#000';
+        deadMessage.innerHTML = 'You are dead.';
+      }, 2610);
+      await this.doAfter(() => {
+        deadMessage.innerHTML = 'Rest In Peace.';
+      }, 1000);
+      await this.doAfter(() => {
+        window.location.href = 'home.html';
+        this.tvStaticMono.pause();
+        console.log(window.location.href);
+      }, 1000);
+    }
+  }
+
+  captureFrame = async () => {
+    this.ctx.clearRect(0, 0, Co.GAME_WIDTH, Co.GAME_HEIGHT);
+    const background = new Image();
+    background.src = require('../static/img/graveyard.png');
+    this.ctx.drawImage(background, 0, 0, background.width, background.height);
+
     // console.log(this.popupState.isOpen);
     if (!this.popupState.isOpen) {
       this.player.move();
       this.player.checkDamage(this.ghosts);
-      if (this.player.hp <= 0) {
-        const statusBar = document.getElementById('status-text-div');
-        if (!statusBar) {
-          return;
-        }
-        statusBar.innerHTML = '죽었습니다. 3초 뒤에 시작 화면으로 이동됩니다.';
-        setTimeout(() => {
-          window.location.href = 'home.html';
-          console.log(window.location.href);
-        }, 3000);
-      }
+      await this.checkHp();
       this.player.checkTask(this.tasks);
       this.ghosts.forEach((ghost) => {
         ghost.move();
@@ -198,23 +329,35 @@ class Game {
     }
     // console.error('RENDER', this.ctx);
     if (this.correctChineseLetters.length === Co.TASK_COUNT) {
-      const statusBar = document.getElementById('status-text-div');
-      if (!statusBar) {
+      const successHolder = document.getElementById('game-success-holder');
+      const successMessage = document.getElementById('game-success');
+      if (!successHolder || !successMessage) {
         return;
       }
-      statusBar.innerHTML =
-        '축하합니다. 모든 한자를 맞추셨습니다. 3초 뒤에 시작 화면으로 이동됩니다.';
-      setTimeout(() => {
-        statusBar.innerHTML =
-          '축하합니다. 모든 한자를 맞추셨습니다. 2초 뒤에 시작 화면으로 이동됩니다.';
-        setTimeout(() => {
-          statusBar.innerHTML =
-            '축하합니다. 모든 한자를 맞추셨습니다. 1초 뒤에 시작 화면으로 이동됩니다.';
-          setTimeout(() => {
-            window.location.href = 'home.html';
-            console.log(window.location.href);
-          }, 1000);
-        }, 1000);
+      successHolder.style.display = 'block';
+      const audio = document.getElementById(
+        'background-music',
+      ) as HTMLAudioElement;
+      if (!audio) {
+        return;
+      }
+      audio.pause();
+
+      this.tvStaticMono.volume = 1;
+      console.log(this.tvStaticMono);
+      this.tvStaticMono?.play();
+      successMessage.innerHTML = 'Good Job';
+      await this.doAfter(() => {
+        successMessage.innerHTML = 'You Have Won';
+        console.log('hahahahaha');
+      }, 1000);
+      await this.doAfter(() => {
+        successMessage.innerHTML = `Now Go. Bye`;
+        console.log('hahahahaha');
+      }, 1000);
+      await this.doAfter(() => {
+        window.location.href = 'home.html';
+        console.log(window.location.href);
       }, 1000);
     } else {
       window.requestAnimationFrame(this.captureFrame);

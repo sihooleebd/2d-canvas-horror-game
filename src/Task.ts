@@ -36,11 +36,13 @@ class Task {
     answerIdx: number,
     correctChineseLetters: ChineseT[],
     popupState: PopupT,
+    pos: PointT,
   ) {
     this.image.src = require('../static/img/chest.png');
     this.image.width = 70;
     this.image.height = 54;
-    this.createTaskOnBorder();
+    this.x = pos.x;
+    this.y = pos.y;
     this.answer = chineseWords[answerIdx];
     this.popupState = popupState;
     let prevTrickQuestion = 0;

@@ -16,24 +16,19 @@ class Ghost {
   yDiff = 0;
   speed = 0;
   damage = 0;
-  constructor(
-    keyPoints: PointT[],
-    ghostImgId: number,
-    speed: number,
-    damage: number,
-  ) {
-    if (keyPoints.length < 2) {
+  constructor(ghostData: GhostDataT) {
+    if (ghostData.keyPoints.length < 2) {
       console.error('KEYPOINTS SHORTER THAN 2. ABORTING...');
       return;
     }
-    this.keyPoints = keyPoints;
+    this.keyPoints = ghostData.keyPoints;
     this.x = this.keyPoints[0].x;
     this.y = this.keyPoints[0].y;
     this.prevKeyPointIdx = 0;
-    this.ghostImgId = ghostImgId;
+    this.ghostImgId = ghostData.imageId;
     this.recalculateXYDiff();
-    this.speed = speed;
-    this.damage = damage;
+    this.speed = ghostData.speed;
+    this.damage = ghostData.damage;
     if (this.ghostImgId == 1) {
       this.image.src = require(`../static/img/ghosts/ghost1.png`);
       this.image.width = 70;
@@ -48,11 +43,11 @@ class Ghost {
       this.image.height = (this.image.width * 46) / 75;
     } else if (this.ghostImgId == 4) {
       this.image.src = require(`../static/img/ghosts/ghost4.png`);
-      this.image.width = 70;
+      this.image.width = 90;
       this.image.height = (this.image.width * 95) / 52;
     } else {
       this.image.src = require(`../static/img/ghosts/ghost5.png`);
-      this.image.width = 70;
+      this.image.width = 90;
       this.image.height = (this.image.width * 98) / 53;
     }
   }

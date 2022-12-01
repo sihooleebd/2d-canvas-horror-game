@@ -45,7 +45,7 @@ html, body {
 	bottom:0;
 }
 
-#start,#how-to-play {
+#start,#how-to-play,#credits {
 	border:none;
 	color:red;
 	background:none;
@@ -53,4 +53,10 @@ html, body {
 	font-family:"fof";
 	cursor:pointer;
   text-decoration: none;
+}
+
+#info {
+  color: red;
+  font-family: 'fof';
+  letter-spacing: 0.7px;
 }

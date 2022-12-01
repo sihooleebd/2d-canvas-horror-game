@@ -27,13 +27,21 @@ class Player {
   }
   move() {
     // console.log('hmm');
-    if (this.curMoveKey.toUpperCase() === 'W') {
+    if (
+      this.curMoveKey.toUpperCase() === 'W' ||
+      this.curMoveKey === 'ㅈ' ||
+      this.curMoveKey === 'ㅉ'
+    ) {
       if (this.y < this.speed * (this.running ? Co.RUNNER_CONSTANT : 1)) {
         return;
       }
       this.y -= this.speed * (this.running ? Co.RUNNER_CONSTANT : 1);
     }
-    if (this.curMoveKey.toUpperCase() === 'S') {
+    if (
+      this.curMoveKey.toUpperCase() === 'S' ||
+      this.curMoveKey === 'ㄴ' ||
+      this.curMoveKey === 'ㄴ'
+    ) {
       if (
         this.y >
         Co.GAME_HEIGHT - this.speed * (this.running ? Co.RUNNER_CONSTANT : 1)
@@ -42,13 +50,21 @@ class Player {
       }
       this.y += this.speed * (this.running ? Co.RUNNER_CONSTANT : 1);
     }
-    if (this.curMoveKey.toUpperCase() === 'A') {
+    if (
+      this.curMoveKey.toUpperCase() === 'A' ||
+      this.curMoveKey === 'ㅁ' ||
+      this.curMoveKey === 'ㅁ'
+    ) {
       if (this.x < this.speed * (this.running ? Co.RUNNER_CONSTANT : 1)) {
         return;
       }
       this.x -= this.speed * (this.running ? Co.RUNNER_CONSTANT : 1);
     }
-    if (this.curMoveKey.toUpperCase() === 'D') {
+    if (
+      this.curMoveKey.toUpperCase() === 'D' ||
+      this.curMoveKey === 'ㅇ' ||
+      this.curMoveKey === 'ㅇ'
+    ) {
       if (
         this.x >
         Co.GAME_WIDTH - this.speed * (this.running ? Co.RUNNER_CONSTANT : 1)
@@ -86,6 +102,9 @@ class Player {
           return;
         }
         hpHtml.innerHTML = `hp : ${this.hp}`;
+        if (this.hp < 0) {
+          this.hp = 0;
+        }
         this.healthBar.value = this.hp;
       }
     });

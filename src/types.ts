@@ -3,14 +3,9 @@ type PointT = {
   y: number;
 };
 
-type GhostT = {
-  pos: PointT;
-  speed: number;
+type GhostDataT = {
   keyPoints: PointT[];
-  prevKeyPoint: number;
-};
-
-type PlayerT = {
-  pos: PointT;
   speed: number;
+  damage: number;
+  imageId: number;
 };

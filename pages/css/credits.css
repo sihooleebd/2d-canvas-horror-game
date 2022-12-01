@@ -1,0 +1,71 @@
+html, body {
+  background: #000;
+}
+
+#main {
+  background:url(/static/img/start-blurred.png);
+  background-size: contain;
+  padding: 0;
+  margin: auto;
+  display: block;
+  width: 1000;
+  height: 563px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px;
+  text-align: center;
+}
+@font-face {
+  font-family: 'bloodthirsty';
+  src: url(/static/font/bloodthirsty.ttf) format('truetype');
+}
+
+@font-face {
+  font-family: 'fof';
+  src: url(/static/font/fof.ttf) format('truetype');
+  src: url(/static/font/fof.otf) format('opentype');
+}
+
+#title {
+  width: 100%;
+  color:red;
+	font-size:70px;
+	font-weight:bold;
+	/* margin:30px; */
+	font-family:"bloodthirsty";
+  position: absolute;
+  margin-top: 0;
+  letter-spacing: 10px;
+  text-align: center;
+}
+
+
+#info {
+  width: 100%;
+  color:red;
+	font-size:30px;
+	font-weight:bold;
+	/* margin:30px; */
+	font-family:"fof";
+  position: absolute;
+  margin-top: 90px;
+  letter-spacing: 10px;
+  position: absolute;
+  left: 0;
+}
+
+#return-home {
+  width: 150px;
+  text-decoration: none;
+  color: red;
+  border: 1px solid red;
+  padding: 20px;
+  border-radius: 5px;
+  position: absolute;
+  /* margin: 0z */
+  margin-top: 450px;
+  left: 424px;
+}
